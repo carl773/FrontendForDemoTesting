@@ -8,11 +8,53 @@ FrontPR is a tool that automatically scans a website for accessibility issues ev
 
 ---
 
-## What is a Pull Request?
+## This is V0 — what works and what doesn't yet
 
-A Pull Request (PR) is how developers propose changes to a project. Instead of changing the code directly, you create a separate "branch" (a copy of the project), make your changes there, and then open a PR to say "hey, I'd like to merge these changes into the main project." Other people can review it before it goes live.
+This version proves the core idea works. When a PR is opened, the scanner runs, visits the live site, and posts a comment with the findings. That's the whole loop — and it works.
 
-FrontPR hooks into this process — the moment a PR is opened, the scanner runs automatically.
+But V0 has known limitations that we already understand and will fix in V1 and V2. Here's an honest breakdown:
+
+### Problem 1 — The scanner scans the wrong version of the site
+
+**What happens now:** When you open a PR, the scanner visits the live production URL (the Azure site). But the PR hasn't been merged yet, so the live site still shows the old code. The scanner is not scanning the changes from the PR — it's scanning whatever was last deployed.
+
+**Why it works for V0:** It still proves the scanning works and the comment posts correctly. For demo purposes, the site already has known accessibility issues baked in, so findings will always show up.
+
+**The V1 fix:** Use Azure Static Web Apps preview URLs. Azure automatically creates a temporary URL for every PR, like `https://brave-pond-0eeb5f910-pr-5.azurestaticapps.net`. The scanner should point at that URL instead of production. This way it scans exactly what's in the PR, not the live site.
+
+---
+
+### Problem 2 — The scanner only checks what axe can see in the browser
+
+**What happens now:** The scanner opens Chrome, loads the page, and runs axe on whatever is rendered. This catches runtime accessibility issues — things that exist in the final HTML that the user actually sees.
+
+**What it misses:** Issues in the source code that axe can't detect. For example: components that are written incorrectly but don't show up on this particular page, ARIA attributes that are wrong in the code but happen to render okay, or issues that only appear on certain screen sizes or interactions.
+
+**The V1/V2 fix:** Add a second layer of scanning that analyzes the raw source code directly — without opening a browser. Tools like ESLint with accessibility plugins (`eslint-plugin-jsx-a11y`) can catch issues at the code level before the page even renders. The full picture is: code-level scan + browser scan combined.
+
+---
+
+### Problem 3 — One comment per scan, no history
+
+**What happens now:** Every time the scan runs, it posts a new comment. If you push 3 commits to the same PR, you get 3 separate comments. There is no tracking of whether issues were fixed between scans.
+
+**The V1 fix:** Keep track of the previous scan result. If a re-scan finds fewer issues, update the comment to show what was fixed. This requires storing scan history somewhere — which leads into the backend and database work.
+
+---
+
+### Problem 4 — No pass/fail status on the PR itself
+
+**What happens now:** The scanner posts a comment but the PR can still be merged even if serious issues are found. GitHub has a concept called a "check" — a green or red status that can block merging. We're not using that yet.
+
+**The V1 fix:** Use the GitHub Checks API to post a proper pass/fail status on the PR. If critical or serious issues are found, the merge button turns red and the PR is blocked until they are fixed.
+
+---
+
+### Problem 5 — No user accounts, no dashboard, no billing
+
+**What happens now:** Anyone can copy the workflow file and use the scanner for free with no limits. There is no way to know who is using it, how many scans are running, or to charge for it.
+
+**The V2 fix:** This is where the backend, database (Xano), and dashboard come in. Users sign up, get a project ID and API token, and the scanner sends results to our backend. This unlocks usage tracking, scan history, billing, and AI-powered fix suggestions.
 
 ---
 
