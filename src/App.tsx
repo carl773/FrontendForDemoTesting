@@ -16,7 +16,7 @@ export default function App() {
 function Nav() {
   return (
     <nav className="nav">
-      <div className="nav-logo">Carl Jonsen</div>
+      <div className="nav-logo">CJ! Jonsen</div>
       <ul className="nav-links">
         <li><a href="#about">About</a></li>
         <li><a href="#projects">Projects</a></li>
