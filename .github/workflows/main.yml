@@ -1,0 +1,16 @@
+name: FrontPR Scan
+
+on:
+  pull_request:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run FrontPR Scanner
+        uses: carl773/FrontPR@main
+        with:
+          target_url: https://brave-pond-0eeb5f910.7.azurestaticapps.net
