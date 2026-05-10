@@ -16,3 +16,4 @@ jobs:
         uses: carl773/FrontPR/github-action@main
         with:
           target_url: https://brave-pond-0eeb5f910.7.azurestaticapps.net
+          api_key: ${{ secrets.FRONTPR_API_KEY }}
